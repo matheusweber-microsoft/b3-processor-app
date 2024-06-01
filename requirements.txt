@@ -6,3 +6,7 @@ azure-functions
 azure-storage-blob>=12.20.0,<13.0.0
 python-dotenv
 azure-identity
+azure-cosmos>=4.6.0,<5.0.0
+pymongo>=4.7.2,<5.0.0
+azure-identity
+azure-keyvault-secrets
