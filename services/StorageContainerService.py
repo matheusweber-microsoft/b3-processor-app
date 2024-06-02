@@ -10,15 +10,9 @@ class StorageContainerService:
 
     def __init__(self):
         self.download_container_name = os.getenv('STORAGE_CONTAINER_DOWNLOAD_CONTAINER')
-        self.logging = Logger()
-        run_local = os.getenv('RUN_LOCAL', False)
-        self.logging.info('SCS-INIT-01 - Initializing Storage Container Service')
-        if run_local:
-            self.logging.info('SCS-INIT-02 - Running locally with connection string')
-            self.blob_service_client = BlobServiceClient.from_connection_string(os.getenv('STORAGE_CONTAINER_CONNECTION_STRING'))
-        else:
-            self.logging.info('SCS-INIT-02 - Running in the serve with Default Azure Credentials')
-            self.blob_service_client = BlobServiceClient(account_url=os.getenv('AZURE_STORAGE_ACCOUNT_URL'), credential=DefaultAzureCredential())
+        self.logging = Logger()        
+        self.logging.info('SCS-INIT-01 - Running in the serve with Default Azure Credentials')
+        self.blob_service_client = BlobServiceClient(account_url=os.getenv('AZURE_STORAGE_ACCOUNT_URL'), credential=DefaultAzureCredential())
 
     def download_blob(self, blob_name):
         self.logging.info('SCS-DB-01 - Download blob method called')
