@@ -3,6 +3,7 @@ from enum import Enum
 class MessageType(Enum):
     DELETE = "delete"
     INDEX = "index"
+    INDEXING = "indexing"
 
     @staticmethod
     def get_processor_type(type_string):

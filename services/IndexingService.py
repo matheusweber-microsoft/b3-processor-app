@@ -1,2 +1,0 @@
-class IndexingService:
-    pass

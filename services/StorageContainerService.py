@@ -1,6 +1,7 @@
 import os
 from azure.storage.blob import BlobServiceClient
 from azure.identity import DefaultAzureCredential
+from io import BytesIO
 
 from exceptions.StorageContainerServiceExceptions import BlobFileDoesntExistsError
 from services.Logger import Logger
@@ -25,6 +26,12 @@ class StorageContainerService:
             if not blob_client.exists():
                 self.logging.error(f"SCS-DB-03 - Blob doenst exists in container.")
                 raise BlobFileDoesntExistsError()
+            
+            # Create a stream and download the blob to it
+            stream = BytesIO()
+            downloader = blob_client.download_blob()
+            downloader.readinto(stream)
+
             self.logging.info('SCS-DB-04 - Blob downloaded with success.')
             return blob_client.download_blob()   
         except Exception as e:
