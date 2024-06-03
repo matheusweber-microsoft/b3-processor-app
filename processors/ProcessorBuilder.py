@@ -3,6 +3,7 @@ from infra.KeyVault import KeyVault
 from models.Message import Message
 from processors.Processor import Processor
 from repositories.CosmosRepository import CosmosRepository
+from services.AzureSearchEmbedService import AzureSearchEmbedService
 from services.StorageContainerService import StorageContainerService
 
 
@@ -14,10 +15,12 @@ class ProcessorBuilder:
         self.storageContainerService = StorageContainerService()
         self.cosmosRepository = CosmosRepository(connection_string=cosmosDBConnectionStringSecret, 
                                                  database_name=cosmosDBDatabaseName)
+        self.searchEmbedService = AzureSearchEmbedService()
 
     def build(self, message: Message) -> Processor:
         return Processor(
             message=message,
             storageContainerService=self.storageContainerService,
-            cosmosRepository=self.cosmosRepository
+            cosmosRepository=self.cosmosRepository,
+            searchEmbedService=self.searchEmbedService
         )

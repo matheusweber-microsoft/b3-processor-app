@@ -12,3 +12,8 @@ class CosmosRepository:
         else:
             self.logging.info("CDB-2-INIT - Using database: '{}'.\n".format(database_name))
         self.logging.info("CDB-3-INIT - Connected to database: '{}'.\n".format(database_name))
+
+    def update(self, collectionName, item_id, updated_data):
+        collection = self.db.get_collection(collectionName)
+        result = collection.update_one({"id": item_id}, {"$set": updated_data})
+        return result.modified_count
