@@ -1,13 +1,6 @@
+from exceptions.MessageExceptions import InvalidMessageError, MalFormattedMessageException
 from models.Message import Message
 from models.ProcessorType import ProcessorType
-
-class InvalidMessageError(Exception):
-    """Raised when the input message is invalid."""
-    pass
-
-class MalFormattedMessageException(Exception):
-    def __init__(self, message):
-        super().__init__(f"Malformatted message: {message}")
 
 class MessageBuilder:
     def __init__(self, dict):

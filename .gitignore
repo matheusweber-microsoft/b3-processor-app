@@ -38,6 +38,13 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
+*.pyc
+
+# Environments
+.env
+.venv
+env/
+venv/
 htmlcov/
 .tox/
 .nox/
