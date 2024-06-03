@@ -12,7 +12,7 @@ class StorageContainerService:
         self.download_container_name = os.getenv('STORAGE_CONTAINER_DOWNLOAD_CONTAINER')
         self.logging = Logger()        
         self.logging.info('SCS-INIT-01 - Running in the serve with Default Azure Credentials')
-        self.blob_service_client = BlobServiceClient(account_url=os.getenv('AZURE_STORAGE_ACCOUNT_URL'), 
+        self.blob_service_client = BlobServiceClient(account_url=os.getenv('STORAGE_CONTAINER_ACCOUNT_URL'), 
                                                      credential=DefaultAzureCredential())
 
     def download_blob(self, blob_name):

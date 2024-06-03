@@ -2,7 +2,6 @@ import json
 import azure.functions as func
 from services.Logger import Logger
 from builders.MessageBuilder import MessageBuilder
-from models.Message import Message
 from dotenv import load_dotenv
 
 from processors.ProcessorBuilder import ProcessorBuilder
@@ -17,8 +16,8 @@ def ActionReceivedFunc(azqueue: func.QueueMessage):
     logging.info('ARF-01 - Receiving a new queue message from queue.')
 
     try:
-        logging.info('ARF-02 - Decoding message')
         az_message = azqueue.get_body().decode('utf-8')
+        logging.info('ARF-02 - Decoding message: ' + az_message)
         az_message_dict = json.loads(az_message)
         message = MessageBuilder(az_message_dict).build()
 

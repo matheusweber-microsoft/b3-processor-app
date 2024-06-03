@@ -1,6 +1,6 @@
 from exceptions.MessageExceptions import InvalidMessageError, MalFormattedMessageException
 from models.Message import Message
-from models.ProcessorType import ProcessorType
+from models.MessageType import MessageType
 
 class MessageBuilder:
     def __init__(self, dict):
@@ -20,12 +20,12 @@ class MessageBuilder:
             raise InvalidMessageError("Message is missing necessary keys")
         
         try:
-            self.processorType = ProcessorType(self.dict['action'])
+            self.messageType = MessageType(self.dict['action'])
         except:
             raise MalFormattedMessageException("Invalid action type")
 
-        self.message = Message(**self.dict)
-        self.message.action = self.processorType
+        self.message = Message(self.dict)
+        self.message.action = self.messageType
         return self
 
     def build(self) -> Message:
