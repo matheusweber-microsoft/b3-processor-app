@@ -10,7 +10,7 @@ app = func.FunctionApp()
 
 @app.queue_trigger(arg_name="azqueue", queue_name="original-docs-action-received-py",
                                connection="AzureWebJobsStorage") 
-def ActionReceivedFunc(azqueue: func.QueueMessage):
+async def ActionReceivedFunc(azqueue: func.QueueMessage):
     load_dotenv()
     logging = Logger()
     logging.info('ARF-01 - Receiving a new queue message from queue.')
@@ -27,7 +27,7 @@ def ActionReceivedFunc(azqueue: func.QueueMessage):
         )
 
         logging.info('ARF-04 - Processing message')
-        processor.process()
+        await processor.process()
 
 
     except Exception as e:
