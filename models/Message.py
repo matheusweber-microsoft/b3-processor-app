@@ -17,4 +17,4 @@ class Message:
     
     def file_path_without_extension(self):
         file_path_without_extension, _ = os.path.splitext(self.storageFilePath)
-        return file_path_without_extension
+        return file_path_without_extension + "1"

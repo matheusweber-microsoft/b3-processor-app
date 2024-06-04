@@ -52,13 +52,13 @@ async def ActionReceivedFunc(azqueue: func.QueueMessage):
     # After sections created it needs indexing and embbeding
 
     # TEST:
-#     {
-#   "action": "index",
-#   "fileId": "73606be1-397e-4e3c-90c6-79a166ca821f",
-#   "storageFilePath": "manualsoperations/counter/B3 Trading Rules.pdf",
-#   "fileName": "B3 Trading Rules.pdf",
-#   "originalFileFormat": "pdf",
-#   "theme": "manualsoperations",
-#   "subtheme": "counter",
-#   "language": "eng"
-# }
+    {
+  "action": "index",
+  "fileId": "73606be1-397e-4e3c-90c6-79a166ca821f",
+  "storageFilePath": "hr/benefits/employee_handbook.pdf",
+  "fileName": "employee_handbook.pdf",
+  "originalFileFormat": "pdf",
+  "theme": "hr",
+  "subtheme": "benefits",
+  "language": "eng"
+}

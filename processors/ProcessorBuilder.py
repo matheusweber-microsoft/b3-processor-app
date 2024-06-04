@@ -14,7 +14,7 @@ class ProcessorBuilder:
         self.storage_container_service = StorageContainerService()
         self.cosmos_repository = CosmosRepository(connection_string=cosmos_db_connection_string_secret, 
                                                  database_name=cosmos_db_database_name)
-        self.search_embed_service = AzureSearchEmbedService()
+        self.search_embed_service = AzureSearchEmbedService(storage_container_service=self.storage_container_service)
 
     def build(self, message: Message) -> Processor:
         return Processor(

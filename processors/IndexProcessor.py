@@ -46,15 +46,15 @@ class IndexProcessor:
 
                 if message.originalFileFormat == 'pdf':
                     self.logger.info("IP-08 - Processing PDF document.")
-                    pdf_processor = PDFDocumentProcessor(storage_container_service=self.storage_container_service)
-                    pdf_processor.process(message, 
+                    pdf_processor = PDFDocumentProcessor(storage_container_service=self.storage_container_service, search_embed_service=self.search_embed_service)
+                    await pdf_processor.process(message, 
                                           file_memory_stream, 
                                           SearchClient(endpoint=os.getenv('AZURE_SEARCH_SERVICE_ENDPOINT'),
                                                        index_name=search_index_name,
                                                        credential=DefaultAzureCredential()
                                                     )
                                         )
-
+                    print('WAITING')
             except Exception as e:
                 raise e
         else:

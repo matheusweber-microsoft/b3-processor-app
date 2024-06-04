@@ -1,5 +1,8 @@
 from io import BytesIO
+from models.DocumentsKBPage import DocumentsKBPage
 from models.Message import Message
+from models.MessageType import MessageType
+from services.AzureSearchEmbedService import AzureSearchEmbedService
 from services.Logger import Logger
 from azure.search.documents import SearchClient
 from PyPDF2 import PdfWriter, PdfReader
@@ -7,18 +10,23 @@ import os
 from pathlib import Path
 from services.StorageContainerService import StorageContainerService
 import tempfile
+import datetime
+import asyncio
 
 class PDFDocumentProcessor:
-    def __init__(self, storage_container_service: StorageContainerService):
+    def __init__(self, storage_container_service: StorageContainerService, search_embed_service: AzureSearchEmbedService):
         self.logger = Logger()
         self.storage_container_service = storage_container_service
+        self.search_embed_service = search_embed_service
 
-    def process(self, message: Message, document_processed_memory_stream: BytesIO, search_client: SearchClient):
+    async def process(self, message: Message, document_processed_memory_stream: BytesIO, search_client: SearchClient):
         self.logger.info("DP-PR-01 - Starting document processor.")
 
         self.logger.info("DP-PR-02 - Opening PDF.")
         pdf_reader = PdfReader(document_processed_memory_stream)
         self.logger.info("DP-PR-03 - Successfully opened original pdf document: +" + message.fileName + ". Pages count: " + str(len(pdf_reader.pages)))
+
+        list_of_pages = []
 
         for i in range(len(pdf_reader.pages)):
             document_page_name = f"{Path(message.fileName).stem}-{i + 1}.pdf"
@@ -47,3 +55,25 @@ class PDFDocumentProcessor:
 
             self.logger.info("DP-PR-06 - Successfully updated document.")
 
+            metadata = DocumentsKBPage(
+                file_page_name=document_page_name,
+                storage_file_path=document_page_full_path,
+                page_number=i+1,
+                index_status=MessageType.INDEXING.value,
+                index_completion_date=datetime.datetime.now(datetime.UTC).timestamp() * 1000
+            )
+
+            self.logger.info("DP-PR-07 - Adding metadata: " + metadata.to_string() + " to list of documents.")
+
+            list_of_pages.append(metadata)
+
+            self.logger.info("DP-PR-08 - Start embbeding process...")
+
+            await self.search_embed_service.embed_blob(
+                file_stream=BytesIO(pdf_bytes),
+                message=message,
+                search_client=search_client,
+                page_full_path=document_page_full_path
+            )
+
+            self.logger.info("DP-PR-09 - Successfully embbeded document.")

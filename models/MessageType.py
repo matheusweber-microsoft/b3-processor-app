@@ -4,6 +4,7 @@ class MessageType(Enum):
     DELETE = "delete"
     INDEX = "index"
     INDEXING = "indexing"
+    INDEXED = "Indexed"
 
     @staticmethod
     def get_processor_type(type_string):
