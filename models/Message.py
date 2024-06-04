@@ -1,3 +1,4 @@
+import os
 from models.MessageType import MessageType
 
 class Message:
@@ -13,3 +14,7 @@ class Message:
         
     def to_string(self):
         return f"Action: {self.action}, File ID: {self.fileId}, Storage File Path: {self.storageFilePath}, File Name: {self.fileName}, Original File Format: {self.originalFileFormat}, Theme: {self.theme}, Subtheme: {self.subtheme}, Language: {self.language}"
+    
+    def file_path_without_extension(self):
+        file_path_without_extension, _ = os.path.splitext(self.storageFilePath)
+        return file_path_without_extension + "1"
