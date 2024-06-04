@@ -12,3 +12,4 @@ azure-identity
 azure-keyvault-secrets
 azure-search-documents==11.6.0b1
 aiohttp
+pypdf2

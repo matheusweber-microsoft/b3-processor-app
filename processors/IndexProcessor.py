@@ -1,48 +1,64 @@
+from io import BytesIO
 import os
 from exceptions.ProcessorExceptions import FileFormatNotSuportedError
 from models.Message import Message
 from models.MessageType import MessageType
+from processors.PDFDocumentProcessor import PDFDocumentProcessor
 from repositories.CosmosRepository import CosmosRepository
 from services.AzureSearchEmbedService import AzureSearchEmbedService
 from services.Logger import Logger
 from services.StorageContainerService import StorageContainerService
+from azure.search.documents import SearchClient
+from azure.identity import DefaultAzureCredential
 
 class IndexProcessor:
     logger = Logger()
 
-    def __init__(self, storageContainerService: StorageContainerService, cosmosRepository: CosmosRepository, searchEmbedService: AzureSearchEmbedService):
-        self.storageContainerService = storageContainerService
-        self.cosmosRepository = cosmosRepository
-        self.searchEmbedService = searchEmbedService
+    def __init__(self, storage_container_service: StorageContainerService, cosmos_repository: CosmosRepository, search_embed_service: AzureSearchEmbedService):
+        self.storage_container_service = storage_container_service
+        self.cosmos_repository = cosmos_repository
+        self.search_embed_service = search_embed_service
 
     async def process(self, message: Message):
         self.logger.info("IP-01 - Starting index processor.")
 
-        originalFileName = message.fileName
-        originalFilePath = message.storageFilePath
-        fileId = message.fileId
+        original_file_name = message.fileName
+        original_file_path = message.storageFilePath
+        file_id = message.fileId
 
         self.logger.info("IP-02 - Checking if file format is supported.")
         
         if message.originalFileFormat in ['pdf', 'docx']:
-            self.logger.info("IP-03 - Updating document index for: " + originalFileName + " with ID: " + fileId)
-            self.cosmosRepository.update("documentskb", fileId, {"indexStatus": MessageType.INDEXING.value})
+            self.logger.info("IP-03 - Updating document index for: " + original_file_name + " with ID: " + file_id)
+            self.cosmos_repository.update("documentskb", file_id, {"index_status": MessageType.INDEXING.value})
 
             try:
                 self.logger.info("IP-04 - Downloading blob file: " + message.storageFilePath)
-                fileMemoryStream = self.storageContainerService.download_blob(message.storageFilePath)
+
+                file_memory_stream = BytesIO(self.storage_container_service.download_blob(message.storageFilePath).readall())
                 self.logger.info("IP-05 - Success downloading blob file and store in a memory stream")
 
-                searchIndexName = self.get_azure_search_index_name_for(message)
-                self.logger.info("IP-06 - Get index name: " + searchIndexName)
+                search_index_name = self.get_azure_search_index_name_for(message)
+                self.logger.info("IP-06 - Get index name: " + search_index_name)
 
-                self.logger.info("IP-07 - Ensure the index exists")
-                await self.searchEmbedService.ensure_search_index_exists(searchIndexName)
+                self.logger.info("IP-07 - Creating or updating the index")
+                await self.search_embed_service.create_or_update_the_index_if_exists(search_index_name)
+
+                if message.originalFileFormat == 'pdf':
+                    self.logger.info("IP-08 - Processing PDF document.")
+                    pdf_processor = PDFDocumentProcessor(storage_container_service=self.storage_container_service)
+                    pdf_processor.process(message, 
+                                          file_memory_stream, 
+                                          SearchClient(endpoint=os.getenv('AZURE_SEARCH_SERVICE_ENDPOINT'),
+                                                       index_name=search_index_name,
+                                                       credential=DefaultAzureCredential()
+                                                    )
+                                        )
 
             except Exception as e:
                 raise e
         else:
-            raise FileFormatNotSuportedError(message.originalFileFormat)
+            raise FileFormatNotSuportedError(message.original_file_format)
         
     def get_azure_search_index_name_for(self, message: Message):
         return message.theme + "-index-" + message.language
