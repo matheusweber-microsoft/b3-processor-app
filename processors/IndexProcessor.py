@@ -36,8 +36,8 @@ class IndexProcessor:
                 searchIndexName = self.get_azure_search_index_name_for(message)
                 self.logger.info("IP-06 - Get index name: " + searchIndexName)
 
-                self.logger.info("IP-07 - Creating or updating the index")
-                await self.searchEmbedService.create_or_update_the_index_if_exists(searchIndexName)
+                self.logger.info("IP-07 - Ensure the index exists")
+                await self.searchEmbedService.ensure_search_index_exists(searchIndexName)
 
             except Exception as e:
                 raise e

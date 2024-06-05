@@ -29,7 +29,7 @@ class AzureSearchEmbedService:
             credential=DefaultAzureCredential(),
         )
         
-    async def create_or_update_the_index_if_exists(self, search_index_name):
+    async def ensure_search_index_exists(self, search_index_name):
         self.logger.info("ASES-COUI-01 - Creating or update the index called.")
 
         vector_search_config_name = "b3-vector-config"
