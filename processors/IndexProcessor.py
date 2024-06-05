@@ -42,7 +42,7 @@ class IndexProcessor:
                 self.logger.info("IP-06 - Get index name: " + search_index_name)
 
                 self.logger.info("IP-07 - Creating or updating the index")
-                await self.search_embed_service.create_or_update_the_index_if_exists(search_index_name)
+                await self.search_embed_service.ensure_search_index_exists(search_index_name)
 
                 if message.originalFileFormat == 'pdf':
                     self.logger.info("IP-08 - Processing PDF document.")
