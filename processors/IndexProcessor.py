@@ -2,11 +2,7 @@ from io import BytesIO
 import os
 from exceptions.ProcessorExceptions import FileFormatNotSuportedError
 from models.Message import Message
-<<<<<<< HEAD
 from models.IndexStatus import IndexStatus
-=======
-from models.MessageType import MessageType
->>>>>>> feature/page-container-service
 from processors.PDFDocumentProcessor import PDFDocumentProcessor
 from repositories.CosmosRepository import CosmosRepository
 from services.AzureSearchEmbedService import AzureSearchEmbedService
@@ -50,8 +46,9 @@ class IndexProcessor:
 
                 if message.originalFileFormat == 'pdf':
                     self.logger.info("IP-08 - Processing PDF document.")
-                    pdf_processor = PDFDocumentProcessor(storage_container_service=self.storage_container_service)
-                    pdf_processor.process(message, 
+                    pdf_processor = PDFDocumentProcessor(storage_container_service=self.storage_container_service, 
+                                                         search_embed_service=self.search_embed_service)
+                    await pdf_processor.process(message, 
                                           file_memory_stream, 
                                           SearchClient(endpoint=os.getenv('AZURE_SEARCH_SERVICE_ENDPOINT'),
                                                        index_name=search_index_name,

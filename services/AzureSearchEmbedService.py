@@ -155,7 +155,7 @@ class AzureSearchEmbedService:
         self.logger.info("ASES-GDT-01 - Extracting text from " + blob_name + " using Azure Form Recognizer")
         page_map = []
 
-        file_format_formatted = "application/pdf" if file_format.lower() == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        file_format_formatted = "application/pdf" if file_format.lower() == "pdf" else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         async with DocumentIntelligenceClient(
             endpoint=os.getenv('AZURE_FORM_RECOGNIZER_SERVICE_ENDPOINT'), credential=DefaultAzureCredential()
         ) as document_intelligence_client:
