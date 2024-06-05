@@ -1,5 +1,5 @@
 import os
-from models.MessageType import MessageType
+from models.IndexStatus import IndexStatus
 
 class Message:
     def __init__(self, data: dict):

@@ -1,6 +1,6 @@
 from exceptions.ProcessorExceptions import ActionNotSupportedError
 from models.Message import Message
-from models.MessageType import MessageType
+from models.IndexStatus import IndexStatus
 from processors.IndexProcessor import IndexProcessor
 from repositories.CosmosRepository import CosmosRepository
 from services.AzureSearchEmbedService import AzureSearchEmbedService
@@ -19,10 +19,10 @@ class Processor:
     async def process(self):
         self.logger.info("PR-01 - Starting processing the message for message: " + self.message.to_string())
         
-        if self.message.action == MessageType.INDEX:
+        if self.message.action == IndexStatus.INDEX:
             self.logger.info("PR-02 - Starting index processor")
             await self.index_processor.process(self.message)
-        elif self.message.action == MessageType.DELETE:
+        elif self.message.action == IndexStatus.DELETE:
             self.logger.info("PR-02 - Starting delete processor")
         else:
             self.logger.error("PR-02 - Action provided not supported")

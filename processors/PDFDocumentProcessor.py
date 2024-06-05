@@ -1,7 +1,7 @@
 from io import BytesIO
 from models.DocumentsKBPage import DocumentsKBPage
 from models.Message import Message
-from models.MessageType import MessageType
+from models.IndexStatus import IndexStatus
 from services.AzureSearchEmbedService import AzureSearchEmbedService
 from services.Logger import Logger
 from azure.search.documents import SearchClient
@@ -59,7 +59,7 @@ class PDFDocumentProcessor:
                 file_page_name=document_page_name,
                 storage_file_path=document_page_full_path,
                 page_number=i+1,
-                index_status=MessageType.INDEXING.value,
+                index_status=IndexStatus.PROCESSING.value,
                 index_completion_date=datetime.datetime.now(datetime.UTC).timestamp() * 1000
             )
 

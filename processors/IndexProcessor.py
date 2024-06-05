@@ -2,7 +2,7 @@ from io import BytesIO
 import os
 from exceptions.ProcessorExceptions import FileFormatNotSuportedError
 from models.Message import Message
-from models.MessageType import MessageType
+from models.IndexStatus import IndexStatus
 from processors.PDFDocumentProcessor import PDFDocumentProcessor
 from repositories.CosmosRepository import CosmosRepository
 from services.AzureSearchEmbedService import AzureSearchEmbedService
@@ -30,7 +30,7 @@ class IndexProcessor:
         
         if message.originalFileFormat in ['pdf', 'docx']:
             self.logger.info("IP-03 - Updating document index for: " + original_file_name + " with ID: " + file_id)
-            self.cosmos_repository.update("documentskb", file_id, {"index_status": MessageType.INDEXING.value})
+            self.cosmos_repository.update("documentskb", file_id, {"index_status": IndexStatus.PROCESSING.value})
 
             try:
                 self.logger.info("IP-04 - Downloading blob file: " + message.storageFilePath)
