@@ -15,7 +15,7 @@ class IndexProcessor:
         self.cosmosRepository = cosmosRepository
         self.searchEmbedService = searchEmbedService
 
-    def process(self, message: Message):
+    async def process(self, message: Message):
         self.logger.info("IP-01 - Starting index processor.")
 
         originalFileName = message.fileName
@@ -36,13 +36,8 @@ class IndexProcessor:
                 searchIndexName = self.get_azure_search_index_name_for(message)
                 self.logger.info("IP-06 - Get index name: " + searchIndexName)
 
-                index = self.searchEmbedService.get_index(searchIndexName)
-
-                if index != None:
-                    self.logger.info("IP-07 - Index already exists. Updating index.")
-                else:
-                    self.logger.info("IP-07 - Index not found. Creating index.")
-                    #self.indexingService.create_index(searchIndexName)
+                self.logger.info("IP-07 - Ensure the index exists")
+                await self.searchEmbedService.ensure_search_index_exists(searchIndexName)
 
             except Exception as e:
                 raise e
