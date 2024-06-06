@@ -5,6 +5,7 @@ class IndexStatus(Enum):
     INDEX = "index"
     PROCESSING = "Processing"
     INDEXED = "Indexed"
+    DELETING = "Deleting"
 
     @staticmethod
     def get_processor_type(type_string):
