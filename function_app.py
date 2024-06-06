@@ -61,4 +61,16 @@ async def ActionReceivedFunc(azqueue: func.QueueMessage):
 #   "theme": "matheus",
 #   "subtheme": "test",
 #   "language": "eng"
+# }.
+
+#     TEST:
+#     {
+#   "action": "index",
+#   "fileId": "6724eaef-f093-4efc-85c3-10e2bf895e3f",
+#   "storageFilePath": "hr/benefits/CompanyPolicies-2.docx",
+#   "fileName": "CompanyPolicies-2.docx",
+#   "originalFileFormat": "docx",
+#   "theme": "matheus",
+#   "subtheme": "test",
+#   "language": "eng"
 # }

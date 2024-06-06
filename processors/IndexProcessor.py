@@ -4,6 +4,7 @@ import os
 from exceptions.ProcessorExceptions import FileFormatNotSuportedError
 from models.Message import Message
 from models.IndexStatus import IndexStatus
+from processors.DocDocumentProcessor import DocDocumentProcessor
 from processors.PDFDocumentProcessor import PDFDocumentProcessor
 from repositories.CosmosRepository import CosmosRepository
 from services.AzureSearchEmbedService import AzureSearchEmbedService
@@ -57,7 +58,19 @@ class IndexProcessor:
                                                        credential=DefaultAzureCredential()
                                                     )
                                         )
-                
+                elif message.originalFileFormat == 'docx':
+                    self.logger.info("IP-08 - Processing DOCX document.")
+                    doc_processor = DocDocumentProcessor(storage_container_service=self.storage_container_service, 
+                                                         search_embed_service=self.search_embed_service,
+                                                         cosmos_repository=self.cosmos_repository)
+                    await doc_processor.process(message, 
+                                          file_memory_stream, 
+                                          SearchClient(endpoint=os.getenv('AZURE_SEARCH_SERVICE_ENDPOINT'),
+                                                       index_name=search_index_name,
+                                                       credential=DefaultAzureCredential()
+                                                    )
+                                        )
+
                 self.cosmos_repository.update_document_index_completion("documentskb", file_id, int(datetime.datetime.now(datetime.UTC).timestamp() * 1000))
             except Exception as e:
                 raise e
