@@ -1,4 +1,5 @@
 import pymongo
+from models.IndexStatus import IndexStatus
 from services.Logger import Logger
 
 class CosmosRepository:
@@ -17,3 +18,17 @@ class CosmosRepository:
         collection = self.db.get_collection(collectionName)
         result = collection.update_one({"id": item_id}, {"$set": updated_data})
         return result.modified_count
+    
+    def update_document_page_async(self, collectionName, item_id, documentKBPage):
+        collection = self.db.get_collection(collectionName)
+        filter = {"id": item_id}
+        update = {"$push": {"documentPages": documentKBPage}}
+        update_result = collection.update_one(filter, update)
+        return update_result.modified_count != 0
+    
+    def update_document_index_completion(self, collectionName, item_id, indexCompletionDate):
+        collection = self.db.get_collection(collectionName)
+        filter = {"id": item_id}
+        update = {"$set": {"indexStatus": IndexStatus.INDEXED.value, "indexCompletionDate": indexCompletionDate}}
+        update_result = collection.update_one(filter, update)
+        return update_result.modified_count != 0

@@ -12,3 +12,7 @@ azure-identity
 azure-keyvault-secrets
 azure-search-documents==11.6.0b1
 aiohttp
+pypdf2
+azure-ai-documentintelligence==1.0.0b3
+openai
+azure-core

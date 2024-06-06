@@ -54,11 +54,11 @@ async def ActionReceivedFunc(azqueue: func.QueueMessage):
     # TEST:
 #     {
 #   "action": "index",
-#   "fileId": "73606be1-397e-4e3c-90c6-79a166ca821f",
-#   "storageFilePath": "manualsoperations/counter/B3 Trading Rules.pdf",
-#   "fileName": "B3 Trading Rules.pdf",
+#   "fileId": "59591fff-999d-47a0-9656-9286aab63587",
+#   "storageFilePath": "matheus/test/employee_handbook.pdf",
+#   "fileName": "employee_handbook.pdf",
 #   "originalFileFormat": "pdf",
-#   "theme": "manualsoperations",
-#   "subtheme": "counter",
+#   "theme": "matheus",
+#   "subtheme": "test",
 #   "language": "eng"
 # }
