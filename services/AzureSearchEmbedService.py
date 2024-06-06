@@ -2,10 +2,12 @@ from io import BytesIO
 import os
 from azure.search.documents.indexes.aio import SearchIndexClient
 from azure.identity import DefaultAzureCredential
+from openai import AsyncAzureOpenAI
+from handlers.TextSplitterHandler import TextSplitterHandler
 from models.Message import Message
+from models.Page import Page, SplitPage
 from models.PageDetail import PageDetail
 from services.Logger import Logger
-
 from azure.search.documents.indexes.models import (
     HnswAlgorithmConfiguration,
     HnswParameters,
@@ -28,8 +30,12 @@ from azure.search.documents import SearchClient
 from azure.ai.documentintelligence.aio import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import DocumentTable
 import html
-from typing import IO, AsyncGenerator, List, Union
+from typing import IO, AsyncGenerator, Generator, List, Union
 from azure.ai.formrecognizer import FormRecognizerClient
+from azure.search.documents import IndexDocumentsBatch
+from azure.ai.textanalytics.aio import TextAnalyticsClient
+from azure.core.credentials import AzureKeyCredential
+from azure.identity.aio import get_bearer_token_provider
 
 class AzureSearchEmbedService:
     def __init__(self, storage_container_service: StorageContainerService):
@@ -40,10 +46,35 @@ class AzureSearchEmbedService:
             credential=DefaultAzureCredential(),
         )
         self.storage_container_service = storage_container_service
+        self.text_splitter_handler = TextSplitterHandler()
+        azure_open_ai_endpoint = os.getenv('AZURE_OPENAI_SERVICE_ENDPOINT')
+        azure_deployment = os.getenv('EMBEDDING_DEPLOYMENT_NAME')
         
-    async def ensure_search_index_exists(self, search_index_name):
-        self.logger.info("ASES-COUI-01 - Creating or update the index called.")
+        self.credential = DefaultAzureCredential()
 
+        auth_args = {}
+        auth_args["azure_ad_token_provider"] = get_bearer_token_provider(
+            self.credential, "https://cognitiveservices.azure.com/.default"
+        )
+
+        self.open_ai_client = AsyncAzureOpenAI(
+            azure_endpoint=azure_open_ai_endpoint, 
+            azure_deployment=azure_deployment,
+            api_version="2023-05-15",
+            **auth_args
+        )
+
+    async def ensure_search_index_exists(self, search_index_name):
+        self.logger.info("ASES-COUI-01 - Creating the index if necessary")
+
+        self.logger.info("ASES-COUI-04 - Checking if exists or not.")
+        if search_index_name not in [name async for name in self.search_index_client.list_index_names()]:
+            self.logger.info("ASES-COUI-05 - Creating " + search_index_name + " search index.")
+            await self.create_index(search_index_name)
+        else:
+            self.logger.info("ASES-COUI-05 - Search index " + search_index_name + " already exists.")
+    
+    async def create_index(self, search_index_name: str) -> SearchIndex:
         vector_search_config_name = "b3-vector-config"
         vector_search_profile = "b3-vector-profile"
         content_lang = search_index_name.split("-")[-1]
@@ -123,32 +154,43 @@ class AzureSearchEmbedService:
             ),
         )
 
-        self.logger.info("ASES-COUI-04 - Checking if exists or not.")
-        if search_index_name not in [name async for name in self.search_index_client.list_index_names()]:
-            self.logger.info("ASES-COUI-05 - Creating " + search_index_name + " search index.")
-            await self.search_index_client.create_index(index)
-        else:
-            self.logger.info("ASES-COUI-05 - Search index " + search_index_name + " already exists.")
+        await self.search_index_client.create_index(index)
     
-    async def embed_blob(self, file_stream: BytesIO, message: Message, search_client: SearchClient, page_full_path: str):
-        self.logger.info("ASES-EB-01 - Start embedding blob "+page_full_path)
+    async def embed_blob(self, file_stream: BytesIO, message: Message, search_client: SearchClient, page_full_path: str) -> bool:
+        try:
+            self.logger.info("ASES-EB-01 - Start embedding blob "+page_full_path)
 
-        page_map = await self.parse(file_stream=file_stream,
-                                    blob_name=page_full_path,
-                                    file_format=message.originalFileFormat)
-        
-        self.logger.info("ASES-EB-02 - Embedding text in Azure Search index. Page map count: " + str(len(page_map)))
+            page_map = await self.parse(file_stream=file_stream,
+                                        blob_name=page_full_path,
+                                        file_format=message.originalFileFormat)
+            
+            self.logger.info("ASES-EB-02 - Embedding text in Azure Search index. Page map count: " + str(len(page_map)))
 
-        file_name_without_extension = os.path.splitext(os.path.basename(page_full_path))[0]
-        directory = os.path.dirname(page_full_path)
+            file_name_without_extension = os.path.splitext(os.path.basename(page_full_path))[0]
+            directory = os.path.dirname(page_full_path)
 
-        for page in page_map:
-            corpus_page_name = file_name_without_extension + "-" + str(page.Index) + ".txt"
-            corpus_name_full_path = os.path.join(directory, corpus_page_name)
-            self.logger.info("ASES-EB-03 - Uploading corpus blob for " + corpus_page_name + " with path: " + corpus_name_full_path)
-            corpus_text_file_stream = BytesIO(page.Text.encode('utf-8'))
-            self.storage_container_service.upload_corpus_blob(corpus_name_full_path, corpus_text_file_stream)
-           
+            for page in page_map:
+                corpus_page_name = file_name_without_extension + "-" + str(page.Index) + ".txt"
+                corpus_name_full_path = os.path.join(directory, corpus_page_name)
+                self.logger.info("ASES-EB-03 - Uploading corpus blob for " + corpus_page_name + " with path: " + corpus_name_full_path)
+                corpus_text_file_stream = BytesIO(page.Text.encode('utf-8'))
+                self.storage_container_service.upload_corpus_blob(corpus_name_full_path, corpus_text_file_stream)
+            
+            self.logger.info("ASES-EB-04 - Splitting text into sections.")
+
+            sections = self.text_splitter_handler.split_pages(
+                page_full_path=page_full_path,
+                message=message,
+                pages=page_map
+            )
+            
+            self.logger.info("ASES-EB-05 - Indexing sections in into search index, number of sections: "+ str(len(sections)) +".")
+
+            await self.index_section(sections, search_client)
+        except:
+            self.logger.error("ASES-EB-06 - Error embedding blob "+page_full_path)
+
+        return True
     
     async def parse(self, file_stream: BytesIO, blob_name: str, file_format: str) -> List[PageDetail]:
         model_id = "prebuilt-layout" if file_format.lower() == "pdf" else "prebuilt-read"
@@ -218,3 +260,57 @@ class AzureSearchEmbedService:
             table_html += "</tr>"
         table_html += "</table>"
         return table_html
+    
+    async def index_section(self, sections, search_client: SearchClient):
+        self.logger.info("ASES-IS-01 - Indexing sections in Azure Search index.")
+        iteration = 0
+
+        batch = IndexDocumentsBatch()
+        
+        self.logger.info("ASES-IS-02 - Creating batch index with "+str(len(sections)) + " sections.")
+        for section in sections:
+            result = await self.open_ai_client.embeddings.create(
+                model=os.getenv("EMBEDDING_DEPLOYMENT_NAME"), input=section.content
+            )
+            embedding = result.data[0].embedding
+            
+            document = {
+                "id": section.id,
+                "content": section.content,
+                "sourcepage": section.source_page,
+                "sourcefile": section.source_file,
+                "theme": section.theme,
+                "subtheme": section.sub_theme,
+                "originaldocsource": section.original_doc_source,
+                "contentvector": embedding,
+            }
+
+            batch.add_upload_actions([document])
+            iteration += 1
+
+            if iteration % 1000 == 0:
+                self.logger.info(f"ASES-IS-03 - Indexing batch {iteration}")
+                result = search_client.index_documents(batch)
+
+                succeeded = 0
+                for indexing_result in result:
+                    if indexing_result.succeeded == True:
+                        succeeded += 1
+
+                self.logger.info(f"ASES-IS-04 - Result = "+str(result))
+                self.logger.info(f"ASES-IS-04 - Indexed {len(batch.actions)} sections, {succeeded} succeeded")
+                batch = IndexDocumentsBatch()
+
+        if len(batch.actions) > 0:
+            self.logger.info(f"ASES-IS-05 - Indexing batch {iteration}")
+            result = search_client.index_documents(batch)
+
+            succeeded = 0
+            for indexing_result in result:
+                if indexing_result.succeeded == True:
+                    succeeded += 1
+
+            self.logger.info(f"ASES-IS-04 - Result = "+str(result))
+            self.logger.info(f"ASES-IS-06 - Indexed {len(batch.actions)} sections, {succeeded} succeeded")
+            
+        self.logger.info("ASES-IS-04 - Indexing completed.")

@@ -2,6 +2,7 @@ from io import BytesIO
 from models.DocumentsKBPage import DocumentsKBPage
 from models.Message import Message
 from models.IndexStatus import IndexStatus
+from repositories.CosmosRepository import CosmosRepository
 from services.AzureSearchEmbedService import AzureSearchEmbedService
 from services.Logger import Logger
 from azure.search.documents import SearchClient
@@ -14,10 +15,11 @@ import datetime
 import asyncio
 
 class PDFDocumentProcessor:
-    def __init__(self, storage_container_service: StorageContainerService, search_embed_service: AzureSearchEmbedService):
+    def __init__(self, storage_container_service: StorageContainerService, search_embed_service: AzureSearchEmbedService, cosmos_repository: CosmosRepository):
         self.logger = Logger()
         self.storage_container_service = storage_container_service
         self.search_embed_service = search_embed_service
+        self.cosmos_repository = cosmos_repository
 
     async def process(self, message: Message, document_processed_memory_stream: BytesIO, search_client: SearchClient):
         self.logger.info("DP-PR-01 - Starting document processor.")
@@ -59,8 +61,8 @@ class PDFDocumentProcessor:
                 file_page_name=document_page_name,
                 storage_file_path=document_page_full_path,
                 page_number=i+1,
-                index_status=IndexStatus.PROCESSING.value,
-                index_completion_date=datetime.datetime.now(datetime.UTC).timestamp() * 1000
+                index_status=IndexStatus.INDEXED.value,
+                index_completion_date=int(datetime.datetime.now(datetime.UTC).timestamp() * 1000)
             )
 
             self.logger.info("DP-PR-07 - Adding metadata: " + metadata.to_string() + " to list of documents.")
@@ -69,11 +71,20 @@ class PDFDocumentProcessor:
 
             self.logger.info("DP-PR-08 - Start embbeding process...")
 
-            await self.search_embed_service.embed_blob(
+            embed_result = await self.search_embed_service.embed_blob(
                 file_stream=BytesIO(pdf_bytes),
                 message=message,
                 search_client=search_client,
                 page_full_path=document_page_full_path
             )
 
-            self.logger.info("DP-PR-09 - Successfully embbeded document.")
+            if embed_result == True:
+                self.logger.info("DP-PR-09 - Successfully embbeded document.")
+
+                self.logger.info("DP-PR-10 - Updating Cosmos with the list of pages.")
+
+                result = self.cosmos_repository.update_document_page_async("documentskb", message.fileId, metadata.to_dict())
+
+                self.logger.info("DP-PR-11 - Status: " + str(result) + " for updating Cosmos with the metadata.")
+            else:
+                self.logger.error("DP-PR-09 - Error embbeding document.")

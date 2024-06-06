@@ -22,3 +22,13 @@ class SplitPage:
     def __init__(self, page_num: int, text: str):
         self.page_num = page_num
         self.text = text
+
+class PageSection:
+    def __init__(self, id: str, content: str, source_page: str, source_file: str, theme: str, sub_theme: str, original_doc_source: str):
+        self.id = id
+        self.content = content
+        self.source_page = source_page
+        self.source_file = source_file
+        self.theme = theme
+        self.sub_theme = sub_theme
+        self.original_doc_source = original_doc_source

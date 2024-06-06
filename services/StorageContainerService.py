@@ -43,11 +43,11 @@ class StorageContainerService:
     def upload_page_blob(self, container_name, data):
         self.logging.info(f"SCS-UPB-01 - Uploading blob '{container_name}'.'")
         container_client = self.blob_service_client.get_container_client(self.upload_pages_container_name)
-        container_client.upload_blob(name=container_name, data=data)
+        container_client.upload_blob(name=container_name, data=data, overwrite=True)
         self.logging.info('SCS-UPB-02 - Blob uplodaded.')
 
     def upload_corpus_blob(self, container_name, data):
         self.logging.info(f"SCS-UCP-01 - Uploading blob '{container_name}'.'")
         container_client = self.blob_service_client.get_container_client(self.corpus_container_name)
-        container_client.upload_blob(name=container_name, data=data)
+        container_client.upload_blob(name=container_name, data=data, overwrite=True)
         self.logging.info('SCS-UCP-02 - Blob uplodaded.')
