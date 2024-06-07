@@ -26,8 +26,8 @@ class DeleteProcessor:
         self.storage_container_service.delete_blob("originaldocuments", message.storageFilePath)
         self.storage_container_service.delete_blobs_in_folder("documentpages", message.file_path_without_extension())
         self.storage_container_service.delete_blobs_in_folder("corpus", message.file_path_without_extension())    
-        self.cosmos_repository.delete("documentskb", message.fileId)
         await self.remove_from_index_async(message)
+        self.cosmos_repository.delete("documentskb", message.fileId)
 
     async def remove_from_index_async(self, message: Message):
         search_index_name = self.get_azure_search_index_name_for(message)
@@ -65,7 +65,7 @@ class DeleteProcessor:
             self.logger.info("DP-RI-03 - Removed "+str(len(removed_docs))+" sections from search index "+search_index_name+" from original document "+message.storageFilePath+".")
 
             # It can take a few seconds for search results to reflect changes, so wait a bit
-            await asyncio.sleep(5)
+            await asyncio.sleep(2)
 
         if removed_docs != None:
             self.logger.info("DP-RI-04 - Removed "+str(len(removed_docs))+" sections from search index "+search_index_name+" from original document "+message.storageFilePath+".")

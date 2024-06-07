@@ -62,7 +62,6 @@ class StorageContainerService:
             self.logging.info('SCS-DB-02 - Blob deleted.')
         else:
             self.logging.error(f"SCS-DB-03 - Blob '{blob_name}' doesn't exist in container '{container_name}'.")
-            raise BlobFileDoesntExistsError()
         
     def delete_blobs_in_folder(self, container_name, folder_name):
         self.logging.info("SCS-DBF-01 - Deleting blobs in folder +"+folder_name+".")
@@ -72,7 +71,10 @@ class StorageContainerService:
 
         for blob in blobs:
             blob_client = container_client.get_blob_client(blob.name)
-            #blob_client.delete_blob()
-            self.logging.info(f"SCS-DBF-02 - Blob '{blob.name}' deleted.")
+            if blob_client.exists():
+                blob_client.delete_blob()
+                self.logging.info(f"SCS-DBF-02 - Blob '{blob.name}' deleted.")
+            else:
+                self.logging.error(f"SCS-DBF-03 - Blob '{blob.name}' doesn't exist in container '{container_name}'.")
 
         self.logging.info(f"SCS-DBF-03 - Blobs in folder '{folder_name}' deleted in container '{container_name}'.")

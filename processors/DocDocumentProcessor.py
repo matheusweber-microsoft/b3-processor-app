@@ -46,7 +46,7 @@ class DocDocumentProcessor:
 
         self.logger.info("DP-PR-03 - Created metadata for document page. Metadata: "+metadata.to_string())
 
-        document_page_name = f"{Path(message.fileName).stem}-1.docx"
+        document_page_name = f"{Path(message.fileName).stem}.docx"
         document_page_full_path = f"{message.file_path_without_extension()}/{document_page_name}"
 
         embed_result = await self.search_embed_service.embed_blob(
