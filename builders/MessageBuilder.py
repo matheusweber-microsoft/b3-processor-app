@@ -1,6 +1,6 @@
 from exceptions.MessageExceptions import InvalidMessageError, MalFormattedMessageException
 from models.Message import Message
-from models.IndexStatus import IndexStatus
+from models.MessageType import MessageType
 
 class MessageBuilder:
     def __init__(self, dict):
@@ -20,7 +20,7 @@ class MessageBuilder:
             raise InvalidMessageError("Message is missing necessary keys")
         
         try:
-            self.messageType = IndexStatus(self.dict['action'])
+            self.messageType = MessageType(self.dict['action'])
         except:
             raise MalFormattedMessageException("Invalid action type")
 
