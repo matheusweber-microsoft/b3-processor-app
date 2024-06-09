@@ -2,8 +2,11 @@ import logging
 import os
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 
+from infra.KeyVault import KeyVault
+
 class Logger:
     def __init__(self):
+        keyVault = KeyVault()
         self.logger = logging.getLogger()
         if not self.logger.handlers:
             log_level = os.getenv('LOG_LEVEL', 'INFO')
