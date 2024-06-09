@@ -31,9 +31,7 @@ from azure.ai.documentintelligence.aio import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import DocumentTable
 import html
 from typing import IO, AsyncGenerator, Generator, List, Union
-from azure.ai.formrecognizer import FormRecognizerClient
 from azure.search.documents import IndexDocumentsBatch
-from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
 from azure.identity.aio import get_bearer_token_provider
 
