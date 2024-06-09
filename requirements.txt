@@ -16,3 +16,4 @@ pypdf2
 azure-ai-documentintelligence==1.0.0b3
 openai
 azure-core
+opencensus-ext-azure

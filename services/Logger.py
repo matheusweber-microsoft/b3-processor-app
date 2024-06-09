@@ -1,20 +1,22 @@
 import logging
 import os
+from opencensus.ext.azure.log_exporter import AzureLogHandler
 
-#from opencensus.ext.azure.log_exporter import AzureLogHandler
+from infra.KeyVault import KeyVault
 
 class Logger:
     def __init__(self):
+        keyVault = KeyVault()
         self.logger = logging.getLogger()
         if not self.logger.handlers:
-        #     log_level = os.getenv('LOG_LEVEL', 'INFO')
-        #     self.logger.setLevel(getattr(logging, log_level))
+            log_level = os.getenv('LOG_LEVEL', 'INFO')
+            self.logger.setLevel(getattr(logging, log_level))
             
-        #     # Azure log handler
-        #     azure_handler = AzureLogHandler(connection_string=keyVault.get_secret(os.getenv('KEY_VAULT_APPLICATION_INSIGHTS_CONN_NAME')))
+            # Azure log handler
+            azure_handler = AzureLogHandler(connection_string=keyVault.get_secret(os.getenv('KEY_VAULT_APPLICATION_INSIGHTS_CONN_NAME')))
             formatter = logging.Formatter('%(filename)s - %(levelname)s - %(message)s')
-        #     azure_handler.setFormatter(formatter)
-        #     self.logger.addHandler(azure_handler)
+            azure_handler.setFormatter(formatter)
+            self.logger.addHandler(azure_handler)
 
             # Stream handler
             stream_handler = logging.StreamHandler()
