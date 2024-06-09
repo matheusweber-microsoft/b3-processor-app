@@ -165,8 +165,7 @@ class TextSplitterHandler:
     
     def original_blob_name_with_file_page_ref(self, file_name: str, original_file_path: str, page_name_full_path: str) -> str:
         page_no = page_name_full_path.split('-')[-1].split('.')[0]
-        file_name_without_ext = file_name.split('.')[0]
-        original_file_path = original_file_path.rsplit('/', 1)[0] + '/' + file_name_without_ext + '/' + file_name
+        original_file_path = original_file_path.rsplit('/', 1)[0]  + '/' + file_name
 
         if page_no.isdigit():
             return f"{original_file_path}#page={page_no}"

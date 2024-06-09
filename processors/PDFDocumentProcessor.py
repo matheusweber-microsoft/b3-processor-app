@@ -62,14 +62,14 @@ class PDFDocumentProcessor:
                 storage_file_path=document_page_full_path,
                 page_number=i+1,
                 index_status=IndexStatus.INDEXED.value,
-                index_completion_date=int(datetime.datetime.now(datetime.UTC).timestamp() * 1000)
+                index_completion_date=int(datetime.datetime.now(datetime.timezone.utc).timestamp() * 1000)
             )
 
             self.logger.info("DP-PR-07 - Adding metadata: " + metadata.to_string() + " to list of documents.")
 
             list_of_pages.append(metadata)
 
-            self.logger.info("DP-PR-08 - Start embbeding process...")
+            self.logger.info("DP-PR-08 - Start embedding process...")
 
             embed_result = await self.search_embed_service.embed_blob(
                 file_stream=BytesIO(pdf_bytes),
@@ -79,7 +79,7 @@ class PDFDocumentProcessor:
             )
 
             if embed_result == True:
-                self.logger.info("DP-PR-09 - Successfully embbeded document.")
+                self.logger.info("DP-PR-09 - Successfully embedded document.")
 
                 self.logger.info("DP-PR-10 - Updating Cosmos with the list of pages.")
 
@@ -87,4 +87,4 @@ class PDFDocumentProcessor:
 
                 self.logger.info("DP-PR-11 - Status: " + str(result) + " for updating Cosmos with the metadata.")
             else:
-                self.logger.error("DP-PR-09 - Error embbeding document.")
+                self.logger.error("DP-PR-09 - Error embedding document.")

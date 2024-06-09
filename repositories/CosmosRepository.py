@@ -32,3 +32,13 @@ class CosmosRepository:
         update = {"$set": {"indexStatus": IndexStatus.INDEXED.value, "indexCompletionDate": indexCompletionDate}}
         update_result = collection.update_one(filter, update)
         return update_result.modified_count != 0
+    
+    def get_by_id(self, collectionName, item_id):
+        collection = self.db.get_collection(collectionName)
+        item = collection.find_one({"id": item_id, "indexStatus": IndexStatus.DELETING.value})
+        return item
+    
+    def delete(self, collectionName, item_id):
+        collection = self.db.get_collection(collectionName)
+        result = collection.delete_one({"id": item_id})
+        return result.deleted_count

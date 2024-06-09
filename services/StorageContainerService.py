@@ -15,7 +15,7 @@ class StorageContainerService:
         self.corpus_container_name = "corpus"
         self.logging = Logger()        
         self.logging.info('SCS-INIT-01 - Running in the serve with Default Azure Credentials')
-        self.blob_service_client = BlobServiceClient(account_url=os.getenv('STORAGE_CONTAINER_ACCOUNT_URL'), 
+        self.blob_service_client = BlobServiceClient(account_url=os.getenv('AZURE_STORAGE_BLOB_ENDPOINT'), 
                                                      credential=DefaultAzureCredential())
 
     def download_blob(self, blob_name):
@@ -51,3 +51,30 @@ class StorageContainerService:
         container_client = self.blob_service_client.get_container_client(self.corpus_container_name)
         container_client.upload_blob(name=container_name, data=data, overwrite=True)
         self.logging.info('SCS-UCP-02 - Blob uplodaded.')
+
+    def delete_blob(self, container_name, blob_name):
+        self.logging.info(f"SCS-DB-01 - Deleting blob '{container_name}'.'")
+        container_client = self.blob_service_client.get_container_client(container_name)
+        blob_client = container_client.get_blob_client(blob_name)
+        
+        if blob_client.exists():
+            blob_client.delete_blob()
+            self.logging.info('SCS-DB-02 - Blob deleted.')
+        else:
+            self.logging.error(f"SCS-DB-03 - Blob '{blob_name}' doesn't exist in container '{container_name}'.")
+        
+    def delete_blobs_in_folder(self, container_name, folder_name):
+        self.logging.info("SCS-DBF-01 - Deleting blobs in folder +"+folder_name+".")
+
+        container_client = self.blob_service_client.get_container_client(container_name)
+        blobs = container_client.list_blobs(name_starts_with=folder_name+"/")
+
+        for blob in blobs:
+            blob_client = container_client.get_blob_client(blob.name)
+            if blob_client.exists():
+                blob_client.delete_blob()
+                self.logging.info(f"SCS-DBF-02 - Blob '{blob.name}' deleted.")
+            else:
+                self.logging.error(f"SCS-DBF-03 - Blob '{blob.name}' doesn't exist in container '{container_name}'.")
+
+        self.logging.info(f"SCS-DBF-03 - Blobs in folder '{folder_name}' deleted in container '{container_name}'.")

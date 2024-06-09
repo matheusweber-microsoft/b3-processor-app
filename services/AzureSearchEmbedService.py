@@ -31,9 +31,7 @@ from azure.ai.documentintelligence.aio import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import DocumentTable
 import html
 from typing import IO, AsyncGenerator, Generator, List, Union
-from azure.ai.formrecognizer import FormRecognizerClient
 from azure.search.documents import IndexDocumentsBatch
-from azure.ai.textanalytics.aio import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
 from azure.identity.aio import get_bearer_token_provider
 
@@ -187,8 +185,9 @@ class AzureSearchEmbedService:
             self.logger.info("ASES-EB-05 - Indexing sections in into search index, number of sections: "+ str(len(sections)) +".")
 
             await self.index_section(sections, search_client)
-        except:
-            self.logger.error("ASES-EB-06 - Error embedding blob "+page_full_path)
+
+        except Exception as e:
+            self.logger.error("ASES-EB-06 - Error embedding blob "+page_full_path+" in Azure Search index. Error: "+str(e))
 
         return True
     
