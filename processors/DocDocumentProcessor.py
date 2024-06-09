@@ -41,7 +41,7 @@ class DocDocumentProcessor:
             storage_file_path=message.storageFilePath,
             page_number=1,
             index_status=IndexStatus.INDEXED.value,
-            index_completion_date=int(datetime.datetime.now(datetime.UTC).timestamp() * 1000)
+            index_completion_date=int(datetime.datetime.now(datetime.timezone.utc).timestamp() * 1000)
         )
 
         self.logger.info("DP-PR-03 - Created metadata for document page. Metadata: "+metadata.to_string())
@@ -57,7 +57,7 @@ class DocDocumentProcessor:
         )
 
         if embed_result == True:
-            self.logger.info("DP-PR-04 - Successfully embbeded document.")
+            self.logger.info("DP-PR-04 - Successfully embedded document.")
 
             self.logger.info("DP-PR-05 - Updating Cosmos with the list of pages.")
 
@@ -65,5 +65,5 @@ class DocDocumentProcessor:
 
             self.logger.info("DP-PR-06 - Status: " + str(result) + " for updating Cosmos with the metadata.")
         else:
-            self.logger.error("DP-PR-04 - Error embbeding document.")
+            self.logger.error("DP-PR-04 - Error embedding document.")
         

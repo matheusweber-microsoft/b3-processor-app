@@ -20,7 +20,7 @@ class DeleteProcessor:
         document = self.cosmos_repository.get_by_id("documentskb", message.fileId)
 
         if document is None:
-            self.logger.error("DP-PR-02 - Document not found. FileId: "+message.fileId)
+            self.logger.error("DP-PR-02 - Document not found or document is not ready to be deleted Check Index Status. FileId: "+message.fileId)
             return
         
         self.storage_container_service.delete_blob("originaldocuments", message.storageFilePath)

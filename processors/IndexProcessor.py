@@ -32,7 +32,7 @@ class IndexProcessor:
         
         if message.originalFileFormat in ['pdf', 'docx']:
             self.logger.info("IP-03 - Updating document index for: " + original_file_name + " with ID: " + file_id)
-            self.cosmos_repository.update("documentskb", file_id, {"index_status": IndexStatus.PROCESSING.value})
+            self.cosmos_repository.update("documentskb", file_id, {"indexStatus": IndexStatus.PROCESSING.value})
 
             try:
                 self.logger.info("IP-04 - Downloading blob file: " + message.storageFilePath)
@@ -71,7 +71,7 @@ class IndexProcessor:
                                                     )
                                         )
 
-                self.cosmos_repository.update_document_index_completion("documentskb", file_id, int(datetime.datetime.now(datetime.UTC).timestamp() * 1000))
+                self.cosmos_repository.update_document_index_completion("documentskb", file_id, int(datetime.datetime.now(datetime.timezone.utc).timestamp() * 1000))
             except Exception as e:
                 raise e
         else:
