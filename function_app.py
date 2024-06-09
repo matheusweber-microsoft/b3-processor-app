@@ -8,7 +8,7 @@ from processors.ProcessorBuilder import ProcessorBuilder
 
 app = func.FunctionApp()
 
-@app.queue_trigger(arg_name="azqueue", queue_name="original-docs-action-received-py",
+@app.queue_trigger(arg_name="azqueue", queue_name="original-docs-action-received",
                                connection="AzureWebJobsStorage") 
 async def ActionReceivedFunc(azqueue: func.QueueMessage):
     load_dotenv()
