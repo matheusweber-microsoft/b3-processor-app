@@ -5,7 +5,7 @@ import os
 class KeyVault:
     def __init__(self):
         self.credential = DefaultAzureCredential()
-        self.key_vault_uri = f"https://{os.getenv('KEY_VAULT_NAME')}.vault.azure.net"
+        self.key_vault_uri = os.getenv('KEY_VAULT_NAME_ENDPOINT')
         if self.key_vault_uri is None:
             raise ValueError("KEY_VAULT_NAME_ENDPOINT environment variable is not set")
         self.client = SecretClient(vault_url=self.key_vault_uri, credential=self.credential)
