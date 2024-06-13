@@ -91,6 +91,25 @@ The service checks in the Document metadata store if the document is ready to be
 1. Remove all the indexed sections from Azure AI Search Index for the subject document by using the property `storageFilePath` to filter all the indexed sections into Azure AI Search Index and compare it against the field `originaldocsource` in Azure AI Search Index.
 1. Lastly, it deletes the record from Document Metadata store (Mongo DB) using the `fileId` property.
 
+## Deploying Ingestion Service to Azure Functions
+
+The ingestion service is deployed to Azure Function as a docker image, this means that we need to push a docker image to the Azure Container Registry and then deploy this image to Azure Function.
+
+The Azure function is configured to enable Continuous Deployment via a Webhook URL, this means that when an image tagged with `latest` is pushed to Azure Container Registry, the Azure Function will be notified that there is a new image in ACR, and the Azure Function will pull the image from ACR and deploy this image. Note that permission `AcrPull` should be granted to the Azure Function in order to pull images from ACR.
+
+To build the image and push it to ACR from a developer machine which has access to the code, we can do the following using PowerShell:
+
+```PS
+cd <local path>\b3gpt\ti-ea-processor-py-b3gpt 
+$RESOURCE_GROUP="azr-rg-tech-ia-b3gpt-dev-n"
+$ACR_NAME="azracrtechian"
+$FUNCAPP_PY_NAME = "azr-fct-tech-ia-b3gpt-dev-n"
+
+az acr build --registry $ACR_NAME --image "$($FUNCAPP_PY_NAME):latest" --file 'Dockerfile' .
+```
+
+The `az acr build` will use `docker build` and `docker push` to build the image and push it to ACR, once the image pushed to ACR, the  webhook named `b3gptingestionwebhook` will push a notification to Azure Function to start pulling the latest image.
+
 
 ## Azure Function Identity and Environment variables
 
