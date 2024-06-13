@@ -131,7 +131,7 @@ The Azure Function relies on the following environment variables for its configu
 - `AZURE_OPENAI_SERVICE_ENDPOINT`: The data plane URI of the Azure Open AI Service to which the processor connecting, using the HTTPS scheme. i.e. `https://<openai_service_name>.openai.azure.com/` 
 - `EMBEDDING_DEPLOYMENT_NAME`: The name of embedding model deployed in the Open AI Service.
 - `AZURE_FORM_RECOGNIZER_SERVICE_ENDPOINT`: The data plane URI of the Azure Document Intelligence Service to which the processor connecting, using the HTTPS scheme. i.e. `https://<doc_intelligence_service_name>.cognitiveservices.azure.com/` 
-- `KEY_VAULT_APPLICATION_INSIGHTS_CONN_NAME`: The name of the secret in AKV which stores the Application Insights connection string in it.
+- `APPLICATIONINSIGHTS_CONNECTION_STRING`: The Application Insights connection string.
 - `AZURE_STORAGE_BLOB_ENDPOINT`: The data plane URI of the bloc service to which the processor connecting, using the HTTPS scheme. i.e. `https://<storage_account_name>.blob.core.windows.net/`
 
 Make sure to set these environment variables correctly before deploying and running the Azure Function.

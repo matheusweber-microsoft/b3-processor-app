@@ -32,7 +32,7 @@ class DocDocumentProcessor:
             with open(temp_file.name, "rb") as binary_file:
                 doc_bytes = binary_file.read()
 
-        self.storage_container_service.upload_page_blob(message.storageFilePath, doc_bytes)
+        self.storage_container_service.upload_page_blob(message.storageFilePath, doc_bytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
         self.logger.info("DP-PR-02 - Successfully updated document.")
 
