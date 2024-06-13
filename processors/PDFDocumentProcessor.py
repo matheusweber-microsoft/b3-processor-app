@@ -53,7 +53,7 @@ class PDFDocumentProcessor:
 
             self.logger.info("DP-PR-05 - Uploading document for blob.")
             
-            self.storage_container_service.upload_page_blob(document_page_full_path, pdf_bytes)
+            self.storage_container_service.upload_page_blob(document_page_full_path, pdf_bytes, "application/pdf")
 
             self.logger.info("DP-PR-06 - Successfully updated document.")
 

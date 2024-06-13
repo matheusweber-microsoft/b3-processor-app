@@ -1,5 +1,5 @@
 import os
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from azure.identity import DefaultAzureCredential
 from io import BytesIO
 from exceptions.StorageContainerServiceExceptions import BlobFileDoesntExistsError
@@ -26,7 +26,7 @@ class StorageContainerService:
             blob_client = self.blob_service_client.get_blob_client(container=self.download_container_name, 
                                                                    blob=blob_name)
             if not blob_client.exists():
-                self.logging.error(f"SCS-DB-03 - Blob doenst exists in container.")
+                self.logging.error(f"SCS-DB-03 - Blob does not exists in container.")
                 raise BlobFileDoesntExistsError()
             
             # Create a stream and download the blob to it
@@ -40,17 +40,19 @@ class StorageContainerService:
             self.logging.error(f"SCS-DB-03 - Error on downloading blob: {e}")
             raise e
 
-    def upload_page_blob(self, container_name, data):
+    def upload_page_blob(self, container_name, data, content_type):
         self.logging.info(f"SCS-UPB-01 - Uploading blob '{container_name}'.'")
         container_client = self.blob_service_client.get_container_client(self.upload_pages_container_name)
-        container_client.upload_blob(name=container_name, data=data, overwrite=True)
-        self.logging.info('SCS-UPB-02 - Blob uplodaded.')
+        cnt_settings = ContentSettings(content_type=content_type)
+        container_client.upload_blob(name=container_name, data=data, content_settings=cnt_settings, overwrite=True)
+        self.logging.info('SCS-UPB-02 - Blob uploaded.')
 
     def upload_corpus_blob(self, container_name, data):
         self.logging.info(f"SCS-UCP-01 - Uploading blob '{container_name}'.'")
         container_client = self.blob_service_client.get_container_client(self.corpus_container_name)
-        container_client.upload_blob(name=container_name, data=data, overwrite=True)
-        self.logging.info('SCS-UCP-02 - Blob uplodaded.')
+        cnt_settings = ContentSettings(content_type='text/plain')
+        container_client.upload_blob(name=container_name, data=data, content_settings=cnt_settings, overwrite=True)
+        self.logging.info('SCS-UCP-02 - Blob uploaded.')
 
     def delete_blob(self, container_name, blob_name):
         self.logging.info(f"SCS-DB-01 - Deleting blob '{container_name}'.'")
